@@ -1,4 +1,6 @@
+#pragma once
 #include <vector>
+#include <memory>
 
 class MultiLayerNet
 {
@@ -6,14 +8,17 @@ public:
     MultiLayerNet(std::vector<int> layerSizeList);
     ~MultiLayerNet();
 
-    // initilaze weights of each layers of each edge
-    void InitializeWeights();
-    std::vector<float>  Prediction();
-    float CalculateLoss();
-    float CalculateAcuracy();
-    std::vector<float> BackPropagation();
+    // we should dont rewrite row-data, so copy value
+    void SetLearningRate(float lr){mLearningRate = lr;}
+    std::vector<float> Prediction(std::vector<float> input);
+    float CalculateLoss(std::vector<float> predict, int label);
+    float CalculateAccuracy(std::vector<float> predict, int label);
+    void BackPropagation();
 
 private:
     std::vector<int> mLayerSizeList;
-    int mHiddenLayerSize;
+    int mHiddenLayerNum;
+    std::vector<class Layer*> mLayerList;
+    class Softmax* mOutputLayer;
+    float mLearningRate;
 };

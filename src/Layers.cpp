@@ -1,7 +1,9 @@
 #include <vector>
 #include <iostream>
+#include <random>
 #include "Layers.hpp"
 #include "functions.hpp"
+
 
 // General Layer Class
 Layer::Layer(int size) : mSize(size)
@@ -30,7 +32,7 @@ void Relu::Forward(std::vector<float> &input)
     }
 }
 
-void Relu::Backward(std::vector<float> &input)
+void Relu::Backward(std::vector<float> &input, float lr)
 {
     for(auto idx : mMask)
     {
@@ -43,10 +45,10 @@ void Relu::Backward(std::vector<float> &input)
 
 
 // Affine layer
-Affine::Affine(int size, std::vector<std::vector<float>> weights, std::vector<float> bias) : Layer(size)
+Affine::Affine(int size, int nextSize) : Layer(size)
 {
-    mWeights = weights;
-    mBias = bias;
+    InitWeights(nextSize);
+    mBias = std::vector<float>(size, 0.0f);
 }
 
 void Affine::Forward(std::vector<float> &input)
@@ -57,10 +59,11 @@ void Affine::Forward(std::vector<float> &input)
         std::cout << "incorrect matrix/vector size" << std::endl;
         return ;
     }
-    input = VecVecAdd<float>(VecMatDot(input, mWeights), mBias);
+    mInput = input;
+    input = VecVecAdd(VecMatDot(input, mWeights), mBias);
 }
 
-void Affine::Backward(std::vector<float> &input)
+void Affine::Backward(std::vector<float> &input, float lr)
 {
     if(input.size() != mWeights[0].size())
     {
@@ -68,5 +71,52 @@ void Affine::Backward(std::vector<float> &input)
         return ;
     }
     input = VecMatDot(input, Transpose(mWeights));
-    mDefWeights = VecMatDot()
+    mDefWeights = VecVecDot(mInput, input);
+    mDefBias = input;
+    for(int i = 0; i < static_cast<int>(mWeights.size()); i++)
+    {
+        for (int j = 0; j < static_cast<int>(mWeights[0].size()); j++)
+        {
+            mWeights[i][j] -= lr * mDefWeights[i][j];
+        }
+    }
+    for(int i = 0; i < static_cast<int>(mBias.size()); i++)
+    {
+        mBias[i] -= lr * mDefBias[i];
+    }
+}
+
+void Affine::InitWeights(int nextSize)
+{
+    std::random_device seed_gen;
+    std::default_random_engine engine(seed_gen());
+    std::normal_distribution<> dist(0.0,1.0);
+    for(int i = 0; i < mSize; i++)
+    {
+        for(int j = 0; j < nextSize; j++)
+        {
+            mWeights[i].push_back(dist(engine));
+        }
+    }
+}
+
+
+// Softmax Layer
+Softmax::Softmax(int size) : Layer(size)
+{
+
+}
+
+float Softmax::LossForward(std::vector<float> &input, int label)
+{
+    mLabel = label;
+    mOutput = SoftmaxActivation(input);
+    mLoss = CrossEntropyError(mOutput, mLabel);
+    return mLoss;
+}
+
+std::vector<float> Softmax::LossBackward()
+{
+    mOutput[mLabel] -= 1;
+    return mOutput;
 }
