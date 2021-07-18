@@ -14,9 +14,9 @@ std::vector<float> VecMatDot(std::vector<float> vecA, std::vector<std::vector<fl
         if (vecA.size() != matB.size()) throw "vector and matrix size is not propoer";
     }
 
-    catch(std::string &str)
+    catch(char const* str)
     {
-        std::cerr << str << '\n';
+        std::cerr << *str << '\n';
     }
     
     std::vector<float> output(matB[0].size());
@@ -61,21 +61,22 @@ std::vector<std::vector<float>> Transpose(std::vector<std::vector<float>> mat)
 
 std::vector<float> VecVecAdd(std::vector<float> vecA, std::vector<float> vecB)
 {
+    int n = static_cast<int>(vecA.size());
     try
     {
         if(vecA.size() != vecB.size()) throw "size of vectors are different";
     }
-    catch(std::string str)
+    catch(char const* str)
     {
-        std::cerr << str << std::endl;
+        std::cerr << *str << std::endl;
     }
-    
-    std::vector<float> output(vecA.size());
-    for (int i = 0; i < static_cast<int>(vecA.size()); i++)
+    std::cout << "size is correct" << std::endl;
+    for (int i = 0; i < n; i++)
     {
-        output[i] = vecA[i] + vecB[i];
+        vecA[i] += vecB[i];
     }
-    return output;
+    std::cout << "added" << std::endl;
+    return vecA;
 }
 
 
@@ -109,9 +110,9 @@ float CrossEntropyError(std::vector<float> output, int label)
     {
         if(label >= static_cast<int>(output.size()) || label < 0) throw "output and label size is not proper";
     }
-    catch(std::string &str)
+    catch(char const* str)
     {
-        std::cerr << str << std::endl;
+        std::cerr << *str << std::endl;
     }
     
     float ans = -std::log(output[label]);

@@ -63,7 +63,6 @@ int main(int argc, char **argv)
     std::cout << "Error: Failed to open file." << std::endl;
     return 1;
   }
-
   while(getline(train_infile, line))
   {
     std::vector<float> data = Line2Float(line);
@@ -79,7 +78,7 @@ int main(int argc, char **argv)
     std::cout << "Error: Failed to open file." << std::endl;
     return 1;
   }
-  
+
   while(getline(test_infile, line))
   {
     std::vector<float> data = Line2Float(line);
@@ -91,7 +90,9 @@ int main(int argc, char **argv)
   test_infile.close();
   
   int iter_num = atoi(argv[3]);
+  std::cout << iter_num << std::endl;
   float learning_rate = atof(argv[4]);
+  std::cout << learning_rate << std::endl;
 
   int train_data_num = train_data.size();
   // log
@@ -101,20 +102,25 @@ int main(int argc, char **argv)
   //std::vector<float> test_acc_list;
 
   // learning
-  std::vector<int> layer_size_list = {28*28, 14*14, 7*7, 10};
-  MultiLayerNet myNet(layer_size_list);
-  myNet.SetLearningRate(learning_rate);
+  std::vector<int> layer_size_list = {28*28, 10};
+  MultiLayerNet* myNet = new MultiLayerNet(layer_size_list);
+  myNet->SetLearningRate(learning_rate);
 
   for(int epoch = 0; epoch < iter_num; epoch++)
   {
+    std::cout << "epoch" << std::endl;
     float accuracy = 0.0f;
     float loss = 0.0f;
     for(int i = 0; i < train_data_num; i++)
     {
-      auto pred = myNet.Prediction(train_data[i]);
-      loss += myNet.CalculateLoss(pred, train_labels[i]);
-      accuracy += myNet.CalculateAccuracy(pred, train_labels[i]);
-      myNet.BackPropagation();
+      auto pred = myNet->Prediction(train_data[i]);
+      std::cout << "pred" << std::endl;
+      loss += myNet->CalculateLoss(pred, train_labels[i]);
+      std::cout << "loss" << std::endl;
+      accuracy += myNet->CalculateAccuracy(pred, train_labels[i]);
+      std::cout << "acc" << std::endl;
+      myNet->BackPropagation();
+      std::cout << "back" << std::endl;
     }
 
     accuracy /= static_cast<float>(train_data_num);

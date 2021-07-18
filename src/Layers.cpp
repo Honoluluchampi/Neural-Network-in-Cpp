@@ -6,9 +6,9 @@
 
 
 // General Layer Class
-Layer::Layer(int size) : mSize(size)
+Layer::Layer(int size)
 {
-
+    mSize = size;
 }
 
 
@@ -20,6 +20,14 @@ Relu::Relu(int size) : Layer(size)
 
 void Relu::Forward(std::vector<float> &input)
 {
+    try
+    {
+        if(static_cast<int>(input.size()) != mSize) throw "x";
+    }
+    catch(char const* str)
+    {
+        std::cout << *str << std::endl;
+    }
     // mainus value should be zero.
     for(int i; i < mSize; i++)
     {
@@ -45,10 +53,9 @@ void Relu::Backward(std::vector<float> &input, float lr)
 
 
 // Affine layer
-Affine::Affine(int size, int nextSize) : Layer(size)
+Affine::Affine(int size) : Layer(size)
 {
-    InitWeights(nextSize);
-    mBias = std::vector<float>(size, 0.0f);
+
 }
 
 void Affine::Forward(std::vector<float> &input)
@@ -61,6 +68,7 @@ void Affine::Forward(std::vector<float> &input)
     }
     mInput = input;
     input = VecVecAdd(VecMatDot(input, mWeights), mBias);
+    std::cout << "end affine" << std::endl;
 }
 
 void Affine::Backward(std::vector<float> &input, float lr)
@@ -91,6 +99,7 @@ void Affine::InitWeights(int nextSize)
     std::random_device seed_gen;
     std::default_random_engine engine(seed_gen());
     std::normal_distribution<> dist(0.0,1.0);
+    mWeights.resize(mSize);
     for(int i = 0; i < mSize; i++)
     {
         for(int j = 0; j < nextSize; j++)
@@ -98,6 +107,11 @@ void Affine::InitWeights(int nextSize)
             mWeights[i].push_back(dist(engine));
         }
     }
+}
+
+void Affine::InitBias(int nextSize)
+{
+    mBias = std::vector<float>(nextSize, 0.0f);
 }
 
 

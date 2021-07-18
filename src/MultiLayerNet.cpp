@@ -4,13 +4,16 @@
 #include <memory>
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 MultiLayerNet::MultiLayerNet(std::vector<int> layerSizeList):mLayerSizeList(layerSizeList)
 {
     mHiddenLayerNum = mLayerSizeList.size()-2;
     for(int i = 0; i < mHiddenLayerNum + 1; i++)
     {
-        Affine* affine = new Affine(mLayerSizeList[i], mLayerSizeList[i+1]);
+        Affine* affine = new Affine(mLayerSizeList[i]);
+        affine->InitWeights(mLayerSizeList[i+1]);
+        affine->InitBias(mLayerSizeList[i+1]);
         mLayerList.push_back(affine);
         Relu* relu = new Relu(mLayerSizeList[i+1]);
         mLayerList.push_back(relu);
@@ -21,8 +24,10 @@ MultiLayerNet::MultiLayerNet(std::vector<int> layerSizeList):mLayerSizeList(laye
 
 std::vector<float> MultiLayerNet::Prediction(std::vector<float> input)
 {
+    std::cout << "layer num : " << mLayerList.size() << std::endl;
     for (auto &layer : mLayerList)
     {
+        std::cout << "layer" << std::endl;
         layer->Forward(input);
     }
     

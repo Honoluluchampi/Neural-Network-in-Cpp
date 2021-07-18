@@ -35,11 +35,12 @@ private:
 class Affine : public Layer
 {
 public:
-    Affine(int size, int nextSize);
+    Affine(int size);
 
     void Forward(std::vector<float> &input)override;
     void Backward(std::vector<float> &input, float lr)override;
     void InitWeights(int nextSize);
+    void InitBias(int nextSize);
 
 private:
     std::vector<float> mInput;
